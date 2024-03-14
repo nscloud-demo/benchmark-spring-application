@@ -126,7 +126,13 @@ jobs:
         run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
 
   spring-web-jetty-loom:
-    runs-on: namespace-profile-amd64-with-caching
+    strategy:
+      matrix:
+        runner:
+          - namespace-profile-default
+          - namespace-profile-amd64-with-caching
+      fail-fast: false
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v3
 
