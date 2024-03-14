@@ -20,6 +20,9 @@ jobs:
         runner:
           - namespace-profile-default
           - namespace-profile-amd64-with-caching
+        java-version:
+          - 21
+          - 17
       fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:
@@ -27,7 +30,7 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          java-version: "21"
+          java-version: ${{ matrix.java-version }}
           distribution: "temurin"
           cache: "gradle"
 
@@ -51,20 +54,23 @@ jobs:
       - name: Run download-test
         run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
 
-  spring-web-tomcat-loom:
+  spring-web-tomcat-v4:
     strategy:
       matrix:
         runner:
           - namespace-profile-default
           - namespace-profile-amd64-with-caching
+        java-version:
+          - 21
+          - 17
       fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
-          java-version: "20"
+          java-version: ${{ matrix.java-version }}
           distribution: "temurin"
           cache: "gradle"
 
@@ -77,7 +83,7 @@ jobs:
           ./gradlew :tools:bootstrap --args="postgres"
 
       - name: Start application
-        run: docker compose rm --force && docker compose up -d spring-web-tomcat-loom
+        run: docker compose rm --force && docker compose up -d spring-web-tomcat
 
       - name: Run db-read-test
         run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/db-read-test.js
@@ -87,114 +93,151 @@ jobs:
 
       - name: Run download-test
         run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
+      
+  # spring-web-tomcat-loom:
+  #   strategy:
+  #     matrix:
+  #       runner:
+  #         - namespace-profile-default
+  #         - namespace-profile-amd64-with-caching
+  #     fail-fast: false
+  #   runs-on: ${{ matrix.runner }}
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-  spring-web-jetty:
-    strategy:
-      matrix:
-        runner:
-          - namespace-profile-default
-          - namespace-profile-amd64-with-caching
-      fail-fast: false
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v3
+  #     - uses: actions/setup-java@v3
+  #       with:
+  #         java-version: "20"
+  #         distribution: "temurin"
+  #         cache: "gradle"
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: "20"
-          distribution: "temurin"
-          cache: "gradle"
+  #     - name: Build
+  #       run: ./gradlew :spring-web:build :spring-web:bootBuildImage
 
-      - name: Build
-        run: ./gradlew -Pjetty :spring-web:build :spring-web:bootBuildImage
+  #     - name: Bootstrap
+  #       run: |
+  #         docker compose up -d postgres
+  #         ./gradlew :tools:bootstrap --args="postgres"
 
-      - name: Bootstrap
-        run: |
-          docker compose up -d postgres
-          ./gradlew :tools:bootstrap --args="postgres"
+  #     - name: Start application
+  #       run: docker compose rm --force && docker compose up -d spring-web-tomcat-loom
 
-      - name: Start application
-        run: docker compose rm --force && docker compose up -d spring-web-jetty
+  #     - name: Run db-read-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/db-read-test.js
 
-      - name: Run db-read-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/db-read-test.js
+  #     - name: Run copy-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/copy-test.js
 
-      - name: Run copy-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/copy-test.js
+  #     - name: Run download-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
 
-      - name: Run download-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
+  # spring-web-jetty:
+  #   strategy:
+  #     matrix:
+  #       runner:
+  #         - namespace-profile-default
+  #         - namespace-profile-amd64-with-caching
+  #     fail-fast: false
+  #   runs-on: ${{ matrix.runner }}
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-  spring-web-jetty-loom:
-    strategy:
-      matrix:
-        runner:
-          - namespace-profile-default
-          - namespace-profile-amd64-with-caching
-      fail-fast: false
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v3
+  #     - uses: actions/setup-java@v3
+  #       with:
+  #         java-version: "20"
+  #         distribution: "temurin"
+  #         cache: "gradle"
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: "20"
-          distribution: "temurin"
-          cache: "gradle"
+  #     - name: Build
+  #       run: ./gradlew -Pjetty :spring-web:build :spring-web:bootBuildImage
 
-      - name: Build
-        run: ./gradlew -Pjetty :spring-web:build :spring-web:bootBuildImage
+  #     - name: Bootstrap
+  #       run: |
+  #         docker compose up -d postgres
+  #         ./gradlew :tools:bootstrap --args="postgres"
 
-      - name: Bootstrap
-        run: |
-          docker compose up -d postgres
-          ./gradlew :tools:bootstrap --args="postgres"
+  #     - name: Start application
+  #       run: docker compose rm --force && docker compose up -d spring-web-jetty
 
-      - name: Start application
-        run: docker compose rm --force && docker compose up -d spring-web-jetty-loom
+  #     - name: Run db-read-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/db-read-test.js
 
-      - name: Run db-read-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/db-read-test.js
+  #     - name: Run copy-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/copy-test.js
 
-      - name: Run copy-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/copy-test.js
+  #     - name: Run download-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
 
-      - name: Run download-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
+  # spring-web-jetty-loom:
+  #   strategy:
+  #     matrix:
+  #       runner:
+  #         - namespace-profile-default
+  #         - namespace-profile-amd64-with-caching
+  #     fail-fast: false
+  #   runs-on: ${{ matrix.runner }}
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-  spring-webflux:
-    strategy:
-      matrix:
-        runner:
-          - namespace-profile-default
-          - namespace-profile-amd64-with-caching
-      fail-fast: false
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v3
+  #     - uses: actions/setup-java@v3
+  #       with:
+  #         java-version: "20"
+  #         distribution: "temurin"
+  #         cache: "gradle"
 
-      - uses: actions/setup-java@v3
-        with:
-          java-version: "20"
-          distribution: "temurin"
-          cache: "gradle"
+  #     - name: Build
+  #       run: ./gradlew -Pjetty :spring-web:build :spring-web:bootBuildImage
 
-      - name: Build
-        run: ./gradlew :spring-webflux:build :spring-webflux:bootBuildImage
+  #     - name: Bootstrap
+  #       run: |
+  #         docker compose up -d postgres
+  #         ./gradlew :tools:bootstrap --args="postgres"
 
-      - name: Bootstrap
-        run: |
-          docker compose up -d postgres
-          ./gradlew :tools:bootstrap --args="postgres"
+  #     - name: Start application
+  #       run: docker compose rm --force && docker compose up -d spring-web-jetty-loom
 
-      - name: Start application
-        run: docker compose rm --force && docker compose up -d spring-webflux
+  #     - name: Run db-read-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/db-read-test.js
 
-      - name: Run db-read-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/db-read-test.js
+  #     - name: Run copy-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/copy-test.js
 
-      - name: Run copy-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/copy-test.js
+  #     - name: Run download-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
 
-      - name: Run download-test
-        run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
+  # spring-webflux:
+  #   strategy:
+  #     matrix:
+  #       runner:
+  #         - namespace-profile-default
+  #         - namespace-profile-amd64-with-caching
+  #     fail-fast: false
+  #   runs-on: ${{ matrix.runner }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - uses: actions/setup-java@v3
+  #       with:
+  #         java-version: "20"
+  #         distribution: "temurin"
+  #         cache: "gradle"
+
+  #     - name: Build
+  #       run: ./gradlew :spring-webflux:build :spring-webflux:bootBuildImage
+
+  #     - name: Bootstrap
+  #       run: |
+  #         docker compose up -d postgres
+  #         ./gradlew :tools:bootstrap --args="postgres"
+
+  #     - name: Start application
+  #       run: docker compose rm --force && docker compose up -d spring-webflux
+
+  #     - name: Run db-read-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/db-read-test.js
+
+  #     - name: Run copy-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/copy-test.js
+
+  #     - name: Run download-test
+  #       run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
