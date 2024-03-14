@@ -36,3 +36,5 @@ out/
 
 ### Docker temp files ###
 docker
+
+bin
