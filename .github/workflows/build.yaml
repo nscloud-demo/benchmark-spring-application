@@ -77,7 +77,7 @@ jobs:
           cache: "gradle"
 
       - name: Build
-        run: ./gradlew :spring-web:build :spring-web:bootBuildImage --stacktrace --debug
+        run: ./gradlew :spring-web:build :spring-web:bootBuildImage --info
 
       - name: Bootstrap
         run: |
