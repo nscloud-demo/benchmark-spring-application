@@ -25,8 +25,9 @@ subprojects {
         }
 
         withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage>().configureEach {
+            // XXX Added docker://
             imageName.set(project.name)
-            buildpacks.set(listOf("gcr.io/paketo-buildpacks/adoptium", "urn:cnb:builder:paketo-buildpacks/java"))
+            buildpacks.set(listOf("docker://gcr.io/paketo-buildpacks/adoptium", "urn:cnb:builder:paketo-buildpacks/java"))
             environment.set(
                 mapOf(
                     "BP_JVM_TYPE" to "JDK",
