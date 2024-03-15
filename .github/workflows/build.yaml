@@ -76,7 +76,6 @@ jobs:
           distribution: "temurin"
           cache: "gradle"
 
-      - run: gradle -version
       - run: ./gradlew -version
       - run: java -version
       
