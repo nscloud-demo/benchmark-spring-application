@@ -98,6 +98,13 @@ jobs:
 
       - name: Run download-test
         run: docker run -e TARGET_HOST=application --network benchmark-network --rm -i grafana/k6 run --quiet - <tools/k6/download-test.js
+        
+      - name: Breakpoint for debug
+        if: always()
+        uses: namespacelabs/breakpoint-action@v0
+        with:
+          duration: 15m
+          authorized-users: edganiukov,hugosantos,n-g,htr,nichtverstehen,gmichelo
       
   # spring-web-tomcat-loom:
   #   strategy:
