@@ -1,0 +1,26 @@
+name: Setup Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  spring-web-tomcat:
+    strategy:
+      matrix:
+        runner:
+          - namespace-profile-default
+          - namespace-profile-amd64-with-caching
+        java-version:
+          - 21
+          - 20
+          - 17
+      fail-fast: false
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: "temurin"
+          cache: "gradle"
