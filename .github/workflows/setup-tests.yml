@@ -11,13 +11,20 @@ jobs:
           - namespace-profile-default
           - namespace-profile-amd64-with-caching
         java-version:
-          - 21
+          # - 21
           - 20
-          - 17
+          # - 17
       fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v3
+
+      - name: Breakpoint for debug
+        if: always()
+        uses: namespacelabs/breakpoint-action@v0
+        with:
+          duration: 15m
+          authorized-users: edganiukov,hugosantos,n-g,htr,nichtverstehen,gmichelo
 
       - uses: actions/setup-java@v3
         with:
