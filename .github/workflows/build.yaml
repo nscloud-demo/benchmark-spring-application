@@ -63,8 +63,8 @@ jobs:
           - namespace-profile-amd64-with-caching
         java-version:
           # - 21
-          # - 20
-          - 17
+          - 20
+          # - 17
       fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:
