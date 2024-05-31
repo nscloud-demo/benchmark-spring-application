@@ -59,8 +59,9 @@ jobs:
     strategy:
       matrix:
         runner:
-          - namespace-profile-default
-          - namespace-profile-amd64-with-caching
+          # - namespace-profile-default
+          # - namespace-profile-amd64-with-caching
+          - nscloud-ubuntu-22.04-staging-amd64-2x8
         java-version:
           # - 21
           - 20
